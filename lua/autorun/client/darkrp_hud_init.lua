@@ -1,5 +1,5 @@
 --[[
-	DarkRP Modern HUD - Auto Initialization
+	DarkRP Modern HUD - Auto Initialization (FIXED)
 	Client-side autorun file
 ]]--
 
@@ -28,35 +28,31 @@ hook.Add("HUDShouldDraw", "DarkRPHUD_HideDefaultDarkRP", function(name)
 	end
 end)
 
--- Initialize HUD after DarkRP is fully loaded
-if DarkRP then
-	-- DarkRP is already loaded
+-- FIXED: Better initialization logic
+hook.Add("InitPostEntity", "DarkRPHUD_Initialize", function()
 	timer.Simple(0.5, function()
-		if DarkRPHUD then
+		-- Check if LocalPlayer is valid
+		local ply = LocalPlayer()
+		if not IsValid(ply) then
+			print("[DarkRP HUD] Waiting for player...")
+			return
+		end
+		
+		if DarkRPHUD and not DarkRPHUD.Initialized then
 			DarkRPHUD:Initialize()
-			print("[DarkRP HUD] Initialized immediately (DarkRP already loaded)")
+			print("[DarkRP HUD] Initialized via InitPostEntity")
 		end
 	end)
-else
-	-- Wait for DarkRP to load
-	hook.Add("DarkRPFinishedLoading", "DarkRPHUD_DelayedInit", function()
-		timer.Simple(1, function()
-			if DarkRPHUD then
-				DarkRPHUD:Initialize()
-				print("[DarkRP HUD] Initialized after DarkRP loaded")
-			end
-		end)
-	end)
-end
+end)
 
--- Force initialization on player spawn if not initialized yet
-hook.Add("PlayerInitialSpawn", "DarkRPHUD_PlayerSpawn", function(ply)
-	if ply == LocalPlayer() then
-		timer.Simple(2, function()
-			if DarkRPHUD and not DarkRPHUD.Initialized then
-				DarkRPHUD:Initialize()
-				print("[DarkRP HUD] Force initialized on player spawn")
-			end
-		end)
+-- Fallback initialization
+hook.Add("HUDPaint", "DarkRPHUD_FallbackInit", function()
+	if DarkRPHUD and not DarkRPHUD.Initialized then
+		local ply = LocalPlayer()
+		if IsValid(ply) and ply:IsPlayer() then
+			DarkRPHUD:Initialize()
+			print("[DarkRP HUD] Initialized via HUDPaint fallback")
+			hook.Remove("HUDPaint", "DarkRPHUD_FallbackInit")
+		end
 	end
 end)

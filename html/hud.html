@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DarkRP HUD</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* CRITICAL FIX: Make sure HUD doesn't block clicks */
+        * {
+            pointer-events: none !important;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: transparent;
+        }
+        
+        /* Debug: Add red border to verify HUD loads */
+        #hud-container {
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+    </style>
 </head>
 <body>
     <!-- HUD Container -->
@@ -98,5 +116,56 @@
     </div>
 
     <script src="js/hud.js"></script>
+    <script>
+        // Debug: Log when HTML loads
+        console.log('[DarkRP HUD] HTML loaded successfully!');
+        
+        // Make updateHUD globally accessible
+        window.updateHUD = function(data) {
+            console.log('[DarkRP HUD] Received data:', data);
+            
+            if (!data) return;
+            
+            // Update all HUD elements
+            try {
+                if (data.health !== undefined) {
+                    document.getElementById('health-value').textContent = Math.floor(data.health);
+                    document.getElementById('health-fill').style.width = (data.health / data.maxHealth * 100) + '%';
+                }
+                
+                if (data.armor !== undefined) {
+                    document.getElementById('armor-value').textContent = Math.floor(data.armor);
+                    document.getElementById('armor-fill').style.width = (data.armor / 100 * 100) + '%';
+                }
+                
+                if (data.money !== undefined) {
+                    document.getElementById('money-amount').textContent = data.money;
+                }
+                
+                if (data.job) {
+                    document.getElementById('job-name').textContent = data.job.toUpperCase();
+                }
+                
+                if (data.salary !== undefined) {
+                    document.getElementById('salary-value').textContent = '$' + data.salary;
+                }
+                
+                if (data.ammo !== undefined) {
+                    document.getElementById('ammo-current').textContent = data.ammo;
+                }
+                
+                if (data.ammoReserve !== undefined) {
+                    document.getElementById('ammo-reserve').textContent = data.ammoReserve;
+                }
+            } catch(e) {
+                console.error('[DarkRP HUD] Update error:', e);
+            }
+        };
+        
+        window.addKill = function(data) {
+            console.log('[DarkRP HUD] Kill event:', data);
+            // Killfeed implementation
+        };
+    </script>
 </body>
 </html>
