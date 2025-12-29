@@ -75,13 +75,16 @@ function DarkRPHUD:UpdateData()
 	local ply = LocalPlayer()
 	if not IsValid(ply) then return end
 	
+	-- Check if DarkRP is available
+	local hasDarkRP = DarkRP and type(ply.getDarkRPVar) == "function"
+	
 	local data = {
 		health = ply:Health(),
 		maxHealth = ply:GetMaxHealth(),
 		armor = ply:Armor(),
-		money = ply:getDarkRPVar("money") or 0,
-		job = ply:getDarkRPVar("job") or "Гражданин",
-		salary = ply:getDarkRPVar("salary") or 50,
+		money = hasDarkRP and (ply:getDarkRPVar("money") or 0) or 0,
+		job = hasDarkRP and (ply:getDarkRPVar("job") or "Гражданин") or "Гражданин",
+		salary = hasDarkRP and (ply:getDarkRPVar("salary") or 50) or 50,
 		ammo = 0,
 		ammoReserve = 0
 	}
@@ -89,8 +92,8 @@ function DarkRPHUD:UpdateData()
 	-- Get weapon ammo
 	local weapon = ply:GetActiveWeapon()
 	if IsValid(weapon) then
-		data.ammo = weapon:Clip1()
-		data.ammoReserve = ply:GetAmmoCount(weapon:GetPrimaryAmmoType())
+		data.ammo = weapon:Clip1() or 0
+		data.ammoReserve = ply:GetAmmoCount(weapon:GetPrimaryAmmoType()) or 0
 	end
 	
 	-- Send data to HTML panel
