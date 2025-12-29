@@ -4,8 +4,9 @@
 ]]--
 
 DarkRPHUD = DarkRPHUD or {}
-DarkRPHUD.Version = "1.0.2"
+DarkRPHUD.Version = "1.1.0"
 DarkRPHUD.Panel = nil
+DarkRPHUD.Material = nil
 DarkRPHUD.Initialized = false
 
 -- Load configuration
@@ -21,8 +22,8 @@ function DarkRPHUD:Initialize()
 	
 	print("[DarkRP HUD] Initializing v" .. self.Version)
 	
-	-- Create DHTML panel
-	self:CreatePanel()
+	-- Create HTML material
+	self:CreateHTMLMaterial()
 	
 	-- Start update loop
 	self:StartUpdateLoop()
@@ -38,9 +39,9 @@ function DarkRPHUD:Initialize()
 end
 
 --[[
-	Create DHTML panel for HUD
+	Create HTML material that can be rendered
 ]]--
-function DarkRPHUD:CreatePanel()
+function DarkRPHUD:CreateHTMLMaterial()
 	if IsValid(self.Panel) then
 		self.Panel:Remove()
 	end
@@ -52,17 +53,18 @@ function DarkRPHUD:CreatePanel()
 	self.Panel:SetPos(0, 0)
 	self.Panel:SetSize(scrW, scrH)
 	self.Panel:SetAllowLua(true)
-	self.Panel:SetMouseInputEnabled(false)
-	self.Panel:SetKeyboardInputEnabled(false)
 	
 	-- Load HTML
 	local htmlPath = "asset://garrysmod/addons/gmod-darkrp-hud/html/hud.html"
 	self.Panel:OpenURL(htmlPath)
 	
-	print("[DarkRP HUD] Panel created: " .. scrW .. "x" .. scrH)
-	print("[DarkRP HUD] Loading HTML from: " .. htmlPath)
+	-- Get the HTML material
+	self.Material = self.Panel:GetHTMLMaterial()
 	
-	-- Send initial data after HTML loads
+	print("[DarkRP HUD] HTML material created: " .. scrW .. "x" .. scrH)
+	print("[DarkRP HUD] Loading from: " .. htmlPath)
+	
+	-- Send initial data
 	timer.Simple(2, function()
 		if IsValid(self.Panel) then
 			self:UpdateData()
@@ -151,25 +153,25 @@ function DarkRPHUD:HideDefaultHUD()
 end
 
 --[[
-	Render hook - Draw the HUD panel every frame
+	Render hook - Draw the HUD using material
 ]]--
 hook.Add("HUDPaint", "DarkRPHUD_Paint", function()
 	if not DarkRPHUD.Config.Enabled then return end
 	
-	-- Create panel if it doesn't exist
+	-- Create material if it doesn't exist
 	if not IsValid(DarkRPHUD.Panel) then
-		DarkRPHUD:CreatePanel()
+		DarkRPHUD:CreateHTMLMaterial()
 		return
 	end
 	
-	-- Draw the DHTML panel manually
-	local scrW, scrH = ScrW(), ScrH()
-	
-	-- Method 1: Try PaintManual
-	DarkRPHUD.Panel:SetPaintedManually(true)
-	DarkRPHUD.Panel:SetPos(0, 0)
-	DarkRPHUD.Panel:SetSize(scrW, scrH)
-	DarkRPHUD.Panel:PaintManual()
+	-- Draw the HTML material
+	if DarkRPHUD.Material then
+		local scrW, scrH = ScrW(), ScrH()
+		
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.SetMaterial(DarkRPHUD.Material)
+		surface.DrawTexturedRect(0, 0, scrW, scrH)
+	end
 end)
 
 --[[
@@ -209,6 +211,7 @@ concommand.Add("darkrp_hud_reload", function()
 	if IsValid(DarkRPHUD.Panel) then
 		DarkRPHUD.Panel:Remove()
 	end
+	DarkRPHUD.Material = nil
 	DarkRPHUD.Initialized = false
 	DarkRPHUD:Initialize()
 	print("[DarkRP HUD] Reloaded!")
@@ -224,29 +227,26 @@ concommand.Add("darkrp_hud_debug", function()
 	print("  - Version: " .. DarkRPHUD.Version)
 	print("  - Initialized: " .. tostring(DarkRPHUD.Initialized))
 	print("  - Panel Valid: " .. tostring(IsValid(DarkRPHUD.Panel)))
+	print("  - Material Valid: " .. tostring(DarkRPHUD.Material ~= nil))
 	print("  - Config Enabled: " .. tostring(DarkRPHUD.Config.Enabled))
+	print("  - Screen Size: " .. ScrW() .. "x" .. ScrH())
 	
 	if IsValid(DarkRPHUD.Panel) then
-		local x, y = DarkRPHUD.Panel:GetPos()
 		local w, h = DarkRPHUD.Panel:GetSize()
-		print("  - Panel Position: " .. x .. ", " .. y)
 		print("  - Panel Size: " .. w .. "x" .. h)
-		print("  - Screen Size: " .. ScrW() .. "x" .. ScrH())
-		print("  - Panel Visible: " .. tostring(DarkRPHUD.Panel:IsVisible()))
-		print("  - Panel Alpha: " .. DarkRPHUD.Panel:GetAlpha())
 		
-		-- Try to trigger a manual update
+		-- Send test data
 		DarkRPHUD:UpdateData()
-		print("  - Sent test data to panel")
+		print("  - Test data sent")
 	end
 end)
 
 concommand.Add("darkrp_hud_test_kill", function()
 	if IsValid(DarkRPHUD.Panel) then
-		DarkRPHUD:AddKill("TEST_KILLER", "TEST_VICTIM", "weapon_test")
-		print("[DarkRP HUD] Test kill added to killfeed")
+		DarkRPHUD:AddKill("ТЕСТЕР", "ЦЕЛЬ", "weapon_test")
+		print("[DarkRP HUD] Тестовое убийство добавлено")
 	else
-		print("[DarkRP HUD] Panel not valid!")
+		print("[DarkRP HUD] Панель не создана!")
 	end
 end)
 
