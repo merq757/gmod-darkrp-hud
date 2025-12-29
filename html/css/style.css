@@ -36,8 +36,6 @@ body {
     flex-direction: column;
     gap: 16px;
     max-width: 400px;
-    transform: scale(0.9);
-    transform-origin: bottom left;
 }
 
 /* Job Section */
@@ -74,10 +72,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    background: rgba(26, 26, 26, 0.8);
-    backdrop-filter: blur(20px);
+    background: rgba(26, 26, 26, 0.95);
     padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .job-info {
@@ -123,8 +120,7 @@ body {
 
 /* Money Module */
 .money-module {
-    background: rgba(26, 26, 26, 0.9);
-    backdrop-filter: blur(30px);
+    background: rgba(26, 26, 26, 0.95);
     padding: 16px;
     border-left: 6px solid #5A9EE5;
     display: flex;
@@ -176,9 +172,8 @@ body {
 /* Vitals Module */
 .vitals-module {
     background: rgba(26, 26, 26, 0.95);
-    backdrop-filter: blur(40px);
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
 }
@@ -239,7 +234,6 @@ body {
 
 .vital-value.low-health {
     color: #E55A5A;
-    filter: drop-shadow(0 0 15px #E55A5A);
 }
 
 .armor-value {
@@ -256,7 +250,7 @@ body {
 .vital-bar {
     width: 100%;
     height: 6px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     overflow: hidden;
 }
 
@@ -283,7 +277,7 @@ body {
     position: absolute;
     bottom: 40px;
     right: 40px;
-    background: rgba(26, 26, 26, 0.9);
+    background: rgba(26, 26, 26, 0.95);
     padding: 20px;
     border-right: 6px solid #ECECEC;
     display: flex;
@@ -291,8 +285,6 @@ body {
     align-items: flex-end;
     gap: 8px;
     min-width: 180px;
-    transform: scale(0.9);
-    transform-origin: bottom right;
 }
 
 .arsenal-label {
@@ -352,8 +344,6 @@ body {
     gap: 8px;
     align-items: flex-end;
     width: 350px;
-    transform: scale(0.9);
-    transform-origin: top right;
 }
 
 .killfeed-title {
@@ -375,8 +365,7 @@ body {
 .kill-item {
     display: flex;
     align-items: center;
-    background: rgba(26, 26, 26, 0.7);
-    backdrop-filter: blur(30px);
+    background: rgba(26, 26, 26, 0.9);
     border-right: 4px solid #5A9EE5;
     overflow: hidden;
     width: 100%;
@@ -441,7 +430,6 @@ body {
 /* Low ammo warning */
 .ammo-current.low-ammo {
     color: #E55A5A;
-    filter: drop-shadow(0 0 10px #E55A5A);
 }
 
 .ammo-reserve.low-ammo {
