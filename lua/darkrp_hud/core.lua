@@ -4,7 +4,7 @@
 ]]--
 
 DarkRPHUD = DarkRPHUD or {}
-DarkRPHUD.Version = "1.0.1"
+DarkRPHUD.Version = "1.0.2"
 DarkRPHUD.Panel = nil
 DarkRPHUD.Initialized = false
 
@@ -47,43 +47,26 @@ function DarkRPHUD:CreatePanel()
 	
 	local scrW, scrH = ScrW(), ScrH()
 	
+	-- Create DHTML panel
 	self.Panel = vgui.Create("DHTML")
 	self.Panel:SetPos(0, 0)
 	self.Panel:SetSize(scrW, scrH)
 	self.Panel:SetAllowLua(true)
 	self.Panel:SetMouseInputEnabled(false)
 	self.Panel:SetKeyboardInputEnabled(false)
-	self.Panel:SetPaintedManually(false)  -- Important: allow automatic painting
 	
-	-- Make sure panel is visible
-	self.Panel:SetVisible(true)
-	self.Panel:SetAlpha(255)
-	self.Panel:MakePopup()
-	self.Panel:SetMouseInputEnabled(false)
-	self.Panel:SetKeyboardInputEnabled(false)
-	
-	-- Custom paint function
-	self.Panel.Paint = function(pnl, w, h)
-		-- Don't draw background, let HTML show through
-		return true
-	end
-	
-	-- Find the correct addon path
-	local paths = {
-		"asset://garrysmod/addons/gmod-darkrp-hud/html/hud.html",
-		"asset://garrysmod/addons/gmod-darkrp-hud-main/html/hud.html",
-	}
-	
-	self.Panel:OpenURL(paths[1])
+	-- Load HTML
+	local htmlPath = "asset://garrysmod/addons/gmod-darkrp-hud/html/hud.html"
+	self.Panel:OpenURL(htmlPath)
 	
 	print("[DarkRP HUD] Panel created: " .. scrW .. "x" .. scrH)
-	print("[DarkRP HUD] Loading HTML from: " .. paths[1])
+	print("[DarkRP HUD] Loading HTML from: " .. htmlPath)
 	
-	-- Send initial data after a delay
-	timer.Simple(1, function()
+	-- Send initial data after HTML loads
+	timer.Simple(2, function()
 		if IsValid(self.Panel) then
 			self:UpdateData()
-			print("[DarkRP HUD] Sent initial data to panel")
+			print("[DarkRP HUD] Initial data sent")
 		end
 	end)
 end
@@ -168,23 +151,24 @@ function DarkRPHUD:HideDefaultHUD()
 end
 
 --[[
-	Render hook - Paint the HUD panel
+	Render hook - Draw the HUD panel every frame
 ]]--
 hook.Add("HUDPaint", "DarkRPHUD_Paint", function()
 	if not DarkRPHUD.Config.Enabled then return end
 	
+	-- Create panel if it doesn't exist
 	if not IsValid(DarkRPHUD.Panel) then
 		DarkRPHUD:CreatePanel()
 		return
 	end
 	
-	-- Make sure panel is visible and rendering
-	if not DarkRPHUD.Panel:IsVisible() then
-		DarkRPHUD.Panel:SetVisible(true)
-	end
+	-- Draw the DHTML panel manually
+	local scrW, scrH = ScrW(), ScrH()
 	
-	-- Force panel to paint
+	-- Method 1: Try PaintManual
 	DarkRPHUD.Panel:SetPaintedManually(true)
+	DarkRPHUD.Panel:SetPos(0, 0)
+	DarkRPHUD.Panel:SetSize(scrW, scrH)
 	DarkRPHUD.Panel:PaintManual()
 end)
 
@@ -237,13 +221,32 @@ end)
 
 concommand.Add("darkrp_hud_debug", function()
 	print("[DarkRP HUD] Debug Info:")
+	print("  - Version: " .. DarkRPHUD.Version)
 	print("  - Initialized: " .. tostring(DarkRPHUD.Initialized))
 	print("  - Panel Valid: " .. tostring(IsValid(DarkRPHUD.Panel)))
 	print("  - Config Enabled: " .. tostring(DarkRPHUD.Config.Enabled))
+	
 	if IsValid(DarkRPHUD.Panel) then
-		print("  - Panel Size: " .. DarkRPHUD.Panel:GetWide() .. "x" .. DarkRPHUD.Panel:GetTall())
+		local x, y = DarkRPHUD.Panel:GetPos()
+		local w, h = DarkRPHUD.Panel:GetSize()
+		print("  - Panel Position: " .. x .. ", " .. y)
+		print("  - Panel Size: " .. w .. "x" .. h)
+		print("  - Screen Size: " .. ScrW() .. "x" .. ScrH())
 		print("  - Panel Visible: " .. tostring(DarkRPHUD.Panel:IsVisible()))
 		print("  - Panel Alpha: " .. DarkRPHUD.Panel:GetAlpha())
+		
+		-- Try to trigger a manual update
+		DarkRPHUD:UpdateData()
+		print("  - Sent test data to panel")
+	end
+end)
+
+concommand.Add("darkrp_hud_test_kill", function()
+	if IsValid(DarkRPHUD.Panel) then
+		DarkRPHUD:AddKill("TEST_KILLER", "TEST_VICTIM", "weapon_test")
+		print("[DarkRP HUD] Test kill added to killfeed")
+	else
+		print("[DarkRP HUD] Panel not valid!")
 	end
 end)
 
