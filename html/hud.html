@@ -4,41 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DarkRP HUD</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: transparent;
-            color: white;
-            overflow: hidden;
-        }
-        
-        /* DEBUG TEST - REMOVE LATER */
-        #debug-test {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 0, 0, 0.8);
-            color: white;
-            padding: 40px;
-            font-size: 48px;
-            font-weight: bold;
-            border: 5px solid yellow;
-            z-index: 9999;
-        }
-    </style>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- DEBUG TEST -->
-    <div id="debug-test">HUD IS WORKING!</div>
-    
     <!-- HUD Container -->
     <div id="hud-container">
         
@@ -130,12 +98,5 @@
     </div>
 
     <script src="js/hud.js"></script>
-    <script>
-        // Remove debug after 3 seconds
-        setTimeout(function() {
-            var debug = document.getElementById('debug-test');
-            if (debug) debug.style.display = 'none';
-        }, 3000);
-    </script>
 </body>
 </html>
