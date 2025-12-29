@@ -4,7 +4,7 @@
 ]]--
 
 DarkRPHUD = DarkRPHUD or {}
-DarkRPHUD.Version = "1.0.0"
+DarkRPHUD.Version = "1.0.1"
 DarkRPHUD.Panel = nil
 DarkRPHUD.Initialized = false
 
@@ -53,12 +53,22 @@ function DarkRPHUD:CreatePanel()
 	self.Panel:SetAllowLua(true)
 	self.Panel:SetMouseInputEnabled(false)
 	self.Panel:SetKeyboardInputEnabled(false)
+	self.Panel:SetPaintedManually(false)  -- Important: allow automatic painting
+	
+	-- Make sure panel is visible
+	self.Panel:SetVisible(true)
+	self.Panel:SetAlpha(255)
+	self.Panel:MakePopup()
+	self.Panel:SetMouseInputEnabled(false)
+	self.Panel:SetKeyboardInputEnabled(false)
+	
+	-- Custom paint function
+	self.Panel.Paint = function(pnl, w, h)
+		-- Don't draw background, let HTML show through
+		return true
+	end
 	
 	-- Find the correct addon path
-	local addonPath = "addons/gmod-darkrp-hud/html/hud.html"
-	local fullPath = "asset://garrysmod/" .. addonPath
-	
-	-- Try alternative paths
 	local paths = {
 		"asset://garrysmod/addons/gmod-darkrp-hud/html/hud.html",
 		"asset://garrysmod/addons/gmod-darkrp-hud-main/html/hud.html",
@@ -68,6 +78,14 @@ function DarkRPHUD:CreatePanel()
 	
 	print("[DarkRP HUD] Panel created: " .. scrW .. "x" .. scrH)
 	print("[DarkRP HUD] Loading HTML from: " .. paths[1])
+	
+	-- Send initial data after a delay
+	timer.Simple(1, function()
+		if IsValid(self.Panel) then
+			self:UpdateData()
+			print("[DarkRP HUD] Sent initial data to panel")
+		end
+	end)
 end
 
 --[[
@@ -150,13 +168,24 @@ function DarkRPHUD:HideDefaultHUD()
 end
 
 --[[
-	Render hook
+	Render hook - Paint the HUD panel
 ]]--
 hook.Add("HUDPaint", "DarkRPHUD_Paint", function()
 	if not DarkRPHUD.Config.Enabled then return end
+	
 	if not IsValid(DarkRPHUD.Panel) then
 		DarkRPHUD:CreatePanel()
+		return
 	end
+	
+	-- Make sure panel is visible and rendering
+	if not DarkRPHUD.Panel:IsVisible() then
+		DarkRPHUD.Panel:SetVisible(true)
+	end
+	
+	-- Force panel to paint
+	DarkRPHUD.Panel:SetPaintedManually(true)
+	DarkRPHUD.Panel:PaintManual()
 end)
 
 --[[
@@ -185,7 +214,9 @@ end)
 ]]--
 hook.Add("InitPostEntity", "DarkRPHUD_Init", function()
 	timer.Simple(1, function()
-		DarkRPHUD:Initialize()
+		if not DarkRPHUD.Initialized then
+			DarkRPHUD:Initialize()
+		end
 	end)
 end)
 
@@ -211,6 +242,8 @@ concommand.Add("darkrp_hud_debug", function()
 	print("  - Config Enabled: " .. tostring(DarkRPHUD.Config.Enabled))
 	if IsValid(DarkRPHUD.Panel) then
 		print("  - Panel Size: " .. DarkRPHUD.Panel:GetWide() .. "x" .. DarkRPHUD.Panel:GetTall())
+		print("  - Panel Visible: " .. tostring(DarkRPHUD.Panel:IsVisible()))
+		print("  - Panel Alpha: " .. DarkRPHUD.Panel:GetAlpha())
 	end
 end)
 
