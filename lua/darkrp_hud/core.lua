@@ -4,11 +4,12 @@
 ]]--
 
 DarkRPHUD = DarkRPHUD or {}
-DarkRPHUD.Version = "1.2.0"
+DarkRPHUD.Version = "1.3.0"
 DarkRPHUD.Panel = nil
 DarkRPHUD.Material = nil
 DarkRPHUD.Initialized = false
 DarkRPHUD.TestMode = false
+DarkRPHUD.MaterialReady = false
 
 -- Load configuration
 if not DarkRPHUD.Config then
@@ -37,7 +38,6 @@ function DarkRPHUD:Initialize()
 	self.Initialized = true
 	
 	print("[DarkRP HUD] Initialization complete")
-	print("[DarkRP HUD] If you see this but no HUD, type: darkrp_hud_testmode")
 end
 
 --[[
@@ -48,6 +48,7 @@ function DarkRPHUD:CreateHTMLMaterial()
 		self.Panel:Remove()
 	end
 	
+	self.MaterialReady = false
 	local scrW, scrH = ScrW(), ScrH()
 	
 	-- Create DHTML panel
@@ -60,17 +61,35 @@ function DarkRPHUD:CreateHTMLMaterial()
 	local htmlPath = "asset://garrysmod/addons/gmod-darkrp-hud/html/hud.html"
 	self.Panel:OpenURL(htmlPath)
 	
-	-- Get the HTML material
-	self.Material = self.Panel:GetHTMLMaterial()
-	
-	print("[DarkRP HUD] HTML material created: " .. scrW .. "x" .. scrH)
+	print("[DarkRP HUD] HTML panel created: " .. scrW .. "x" .. scrH)
 	print("[DarkRP HUD] Loading from: " .. htmlPath)
 	
-	-- Send initial data
-	timer.Simple(2, function()
-		if IsValid(self.Panel) then
+	-- Wait for material to be ready
+	local attempts = 0
+	timer.Create("DarkRPHUD_WaitMaterial", 0.5, 20, function()
+		if not IsValid(self.Panel) then
+			timer.Remove("DarkRPHUD_WaitMaterial")
+			return
+		end
+		
+		attempts = attempts + 1
+		self.Material = self.Panel:GetHTMLMaterial()
+		
+		if self.Material then
+			self.MaterialReady = true
+			timer.Remove("DarkRPHUD_WaitMaterial")
+			print("[DarkRP HUD] HTML material ready after " .. (attempts * 0.5) .. " seconds")
+			
+			-- Send initial data
 			self:UpdateData()
 			print("[DarkRP HUD] Initial data sent")
+		else
+			print("[DarkRP HUD] Waiting for material... (attempt " .. attempts .. "/20)")
+			
+			if attempts >= 20 then
+				print("[DarkRP HUD] ERROR: Material failed to load after 10 seconds!")
+				print("[DarkRP HUD] Try: darkrp_hud_testmode for fallback HUD")
+			end
 		end
 	end)
 end
@@ -212,17 +231,20 @@ hook.Add("HUDPaint", "DarkRPHUD_Paint", function()
 		return
 	end
 	
-	-- Draw the HTML material
-	if DarkRPHUD.Material then
-		local scrW, scrH = ScrW(), ScrH()
-		
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.SetMaterial(DarkRPHUD.Material)
-		surface.DrawTexturedRect(0, 0, scrW, scrH)
-	else
-		-- Fallback: show error message
-		draw.SimpleText("[DarkRP HUD] Material not loaded. Type 'darkrp_hud_reload'", "DermaLarge", ScrW() / 2, 100, Color(255, 100, 100), TEXT_ALIGN_CENTER)
+	-- Wait for material to be ready
+	if not DarkRPHUD.MaterialReady or not DarkRPHUD.Material then
+		-- Show loading message
+		draw.SimpleText("[DarkRP HUD] Loading...", "DermaLarge", ScrW() / 2, 100, Color(90, 158, 229), TEXT_ALIGN_CENTER)
+		draw.SimpleText("Type 'darkrp_hud_testmode' for fallback HUD", "DermaDefault", ScrW() / 2, 130, Color(200, 200, 200), TEXT_ALIGN_CENTER)
+		return
 	end
+	
+	-- Draw the HTML material
+	local scrW, scrH = ScrW(), ScrH()
+	
+	surface.SetDrawColor(255, 255, 255, 255)
+	surface.SetMaterial(DarkRPHUD.Material)
+	surface.DrawTexturedRect(0, 0, scrW, scrH)
 end)
 
 --[[
@@ -262,7 +284,9 @@ concommand.Add("darkrp_hud_reload", function()
 	if IsValid(DarkRPHUD.Panel) then
 		DarkRPHUD.Panel:Remove()
 	end
+	timer.Remove("DarkRPHUD_WaitMaterial")
 	DarkRPHUD.Material = nil
+	DarkRPHUD.MaterialReady = false
 	DarkRPHUD.Initialized = false
 	DarkRPHUD:Initialize()
 	print("[DarkRP HUD] Reloaded!")
@@ -283,6 +307,7 @@ concommand.Add("darkrp_hud_debug", function()
 	print("  - Version: " .. DarkRPHUD.Version)
 	print("  - Initialized: " .. tostring(DarkRPHUD.Initialized))
 	print("  - Panel Valid: " .. tostring(IsValid(DarkRPHUD.Panel)))
+	print("  - Material Ready: " .. tostring(DarkRPHUD.MaterialReady))
 	print("  - Material Valid: " .. tostring(DarkRPHUD.Material ~= nil))
 	print("  - Config Enabled: " .. tostring(DarkRPHUD.Config.Enabled))
 	print("  - Test Mode: " .. tostring(DarkRPHUD.TestMode))
@@ -291,6 +316,10 @@ concommand.Add("darkrp_hud_debug", function()
 	if IsValid(DarkRPHUD.Panel) then
 		local w, h = DarkRPHUD.Panel:GetSize()
 		print("  - Panel Size: " .. w .. "x" .. h)
+		
+		-- Force material check
+		local testMat = DarkRPHUD.Panel:GetHTMLMaterial()
+		print("  - GetHTMLMaterial() returns: " .. tostring(testMat))
 		
 		-- Send test data
 		DarkRPHUD:UpdateData()
