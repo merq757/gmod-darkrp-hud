@@ -1,0 +1,10 @@
+{
+	"title": "DarkRP Modern HUD",
+	"type": "ServerContent",
+	"tags": ["roleplay", "scenic"],
+	"ignore": [
+		"*.md",
+		".git*",
+		".vscode/*"
+	]
+}
