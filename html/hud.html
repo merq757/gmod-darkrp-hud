@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkRP HUD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- HUD Container -->
+    <div id="hud-container">
+        
+        <!-- Frame Border -->
+        <div class="hud-frame"></div>
+
+        <!-- Left Bottom: Unit Info -->
+        <div class="unit-info">
+            <!-- Job Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="label-tag">ID_PROFILE</div>
+                    <div class="divider-line"></div>
+                </div>
+                <div class="job-card">
+                    <div class="job-info">
+                        <span class="job-label">Current_Role</span>
+                        <span class="job-name" id="job-name">ГРАЖДАНИН</span>
+                    </div>
+                    <div class="salary-info">
+                        <span class="salary-label">Paycheck</span>
+                        <span class="salary-value" id="salary-value">$50</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Money Module -->
+            <div class="money-module">
+                <div class="money-header">
+                    <span class="money-label">CASH_ASSETS</span>
+                    <div class="money-divider"></div>
+                </div>
+                <div class="money-display">
+                    <span class="money-symbol">$</span>
+                    <span class="money-amount" id="money-amount">5000</span>
+                </div>
+            </div>
+
+            <!-- Vitals Module -->
+            <div class="vitals-module">
+                <div class="vitals-row">
+                    <!-- Health -->
+                    <div class="vital-stat health-stat">
+                        <div class="vital-header">
+                            <span class="vital-label" id="health-label">HEALTH_CORE</span>
+                            <div class="vital-value-wrapper">
+                                <span class="vital-value" id="health-value">100</span>
+                                <span class="vital-percent">%</span>
+                            </div>
+                        </div>
+                        <div class="vital-bar">
+                            <div class="vital-fill" id="health-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Armor -->
+                    <div class="vital-stat armor-stat">
+                        <div class="vital-header">
+                            <span class="vital-label armor-label">SHIELD</span>
+                            <span class="vital-value armor-value" id="armor-value">100</span>
+                        </div>
+                        <div class="vital-bar armor-bar">
+                            <div class="vital-fill armor-fill" id="armor-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Bottom: Arsenal -->
+        <div class="arsenal-module">
+            <span class="arsenal-label">Ammo_Inventory</span>
+            <div class="ammo-display">
+                <span class="ammo-current" id="ammo-current">30</span>
+                <div class="ammo-divider"></div>
+                <div class="ammo-reserve-wrapper">
+                    <span class="reserve-label">RESERVE</span>
+                    <span class="ammo-reserve" id="ammo-reserve">120</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Top: Killfeed -->
+        <div class="killfeed-container">
+            <div class="killfeed-title">KINETIC_FEED</div>
+            <div id="killfeed"></div>
+        </div>
+
+    </div>
+
+    <script src="js/hud.js"></script>
+</body>
+</html>
