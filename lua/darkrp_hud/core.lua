@@ -19,9 +19,7 @@ end
 function DarkRPHUD:Initialize()
 	if self.Initialized then return end
 	
-	if self.Config.Debug then
-		print("[DarkRP HUD] Initializing v" .. self.Version)
-	end
+	print("[DarkRP HUD] Initializing v" .. self.Version)
 	
 	-- Create DHTML panel
 	self:CreatePanel()
@@ -36,9 +34,7 @@ function DarkRPHUD:Initialize()
 	
 	self.Initialized = true
 	
-	if self.Config.Debug then
-		print("[DarkRP HUD] Initialization complete")
-	end
+	print("[DarkRP HUD] Initialization complete")
 end
 
 --[[
@@ -58,12 +54,20 @@ function DarkRPHUD:CreatePanel()
 	self.Panel:SetMouseInputEnabled(false)
 	self.Panel:SetKeyboardInputEnabled(false)
 	
-	-- Load HUD HTML
-	self.Panel:OpenURL("asset://garrysmod/html/hud.html")
+	-- Find the correct addon path
+	local addonPath = "addons/gmod-darkrp-hud/html/hud.html"
+	local fullPath = "asset://garrysmod/" .. addonPath
 	
-	if self.Config.Debug then
-		print("[DarkRP HUD] Panel created: " .. scrW .. "x" .. scrH)
-	end
+	-- Try alternative paths
+	local paths = {
+		"asset://garrysmod/addons/gmod-darkrp-hud/html/hud.html",
+		"asset://garrysmod/addons/gmod-darkrp-hud-main/html/hud.html",
+	}
+	
+	self.Panel:OpenURL(paths[1])
+	
+	print("[DarkRP HUD] Panel created: " .. scrW .. "x" .. scrH)
+	print("[DarkRP HUD] Loading HTML from: " .. paths[1])
 end
 
 --[[
@@ -198,6 +202,16 @@ end)
 concommand.Add("darkrp_hud_toggle", function()
 	DarkRPHUD.Config.Enabled = not DarkRPHUD.Config.Enabled
 	print("[DarkRP HUD] " .. (DarkRPHUD.Config.Enabled and "Enabled" or "Disabled"))
+end)
+
+concommand.Add("darkrp_hud_debug", function()
+	print("[DarkRP HUD] Debug Info:")
+	print("  - Initialized: " .. tostring(DarkRPHUD.Initialized))
+	print("  - Panel Valid: " .. tostring(IsValid(DarkRPHUD.Panel)))
+	print("  - Config Enabled: " .. tostring(DarkRPHUD.Config.Enabled))
+	if IsValid(DarkRPHUD.Panel) then
+		print("  - Panel Size: " .. DarkRPHUD.Panel:GetWide() .. "x" .. DarkRPHUD.Panel:GetTall())
+	end
 end)
 
 return DarkRPHUD
