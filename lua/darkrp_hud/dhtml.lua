@@ -1,6 +1,6 @@
 --[[
 	DarkRP Modern HUD - DHTML Implementation
-	Fixed version with proper initialization
+	Fixed version with modern Tailwind design
 ]]--
 
 DarkRPHUD = DarkRPHUD or {}
@@ -8,7 +8,7 @@ DarkRPHUD.DHTML = {}
 DarkRPHUD.DHTML.Panel = nil
 
 --[[
-	Create DHTML panel (FIXED)
+	Create DHTML panel
 ]]--
 function DarkRPHUD.DHTML:Create()
 	if IsValid(self.Panel) then
@@ -23,14 +23,10 @@ function DarkRPHUD.DHTML:Create()
 	self.Panel:SetSize(scrW, scrH)
 	self.Panel:SetMouseInputEnabled(false)
 	self.Panel:SetKeyboardInputEnabled(false)
-	
-	-- Let VGUI paint it automatically
 	self.Panel:SetPaintedManually(false)
-	
-	-- Make it always on top
 	self.Panel:SetZPos(32767)
 	
-	-- Override Think to keep it visible
+	-- Keep panel visible and updated
 	self.Panel.Think = function(pnl)
 		if not DarkRPHUD or not DarkRPHUD.Config or not DarkRPHUD.Config.Enabled then
 			pnl:SetVisible(false)
@@ -40,51 +36,46 @@ function DarkRPHUD.DHTML:Create()
 		pnl:SetVisible(true)
 		pnl:MoveToFront()
 		
-		-- Keep size synced
 		local w, h = ScrW(), ScrH()
 		if pnl:GetWide() ~= w or pnl:GetTall() ~= h then
 			pnl:SetSize(w, h)
 		end
 	end
 	
-	-- CRITICAL FIX: Correct path without 'addons/' prefix
-	-- GMod automatically searches in addon folders
-	local htmlPath = "asset://garrysmod/html/hud.html"
+	-- Load modern HTML with Tailwind
+	local htmlPath = "asset://garrysmod/html/hud_modern.html"
 	
-	-- Try to load HTML
 	local success = pcall(function()
 		self.Panel:OpenURL(htmlPath)
 	end)
 	
 	if not success then
-		print("[DarkRP HUD] ERROR: Failed to load HTML!")
-		print("[DarkRP HUD] Try using: darkrp_hud_mode lua")
+		print("[DarkRP HUD] ERROR: Failed to load modern HTML!")
+		print("[DarkRP HUD] Fallback: darkrp_hud_mode lua")
 		return
 	end
 	
-	print("[DarkRP HUD] DHTML panel created: " .. scrW .. "x" .. scrH)
+	print("[DarkRP HUD] Modern Tailwind panel created: " .. scrW .. "x" .. scrH)
 	print("[DarkRP HUD] Loading: " .. htmlPath)
 	
-	-- Send initial data after HTML loads
-	timer.Simple(1, function()
+	-- Send initial data
+	timer.Simple(1.5, function()
 		if IsValid(self.Panel) then
 			self:UpdateData()
-			print("[DarkRP HUD] Initial data sent")
+			print("[DarkRP HUD] Initial data sent to modern HUD")
 		end
 	end)
 end
 
 --[[
-	Update HUD data (FIXED with LocalPlayer check)
+	Update HUD data
 ]]--
 function DarkRPHUD.DHTML:UpdateData()
 	if not IsValid(self.Panel) then return end
 	
-	-- CRITICAL FIX: Check LocalPlayer() exists
 	local ply = LocalPlayer()
 	if not IsValid(ply) or not ply:IsPlayer() then return end
 	
-	-- Check DarkRP availability
 	local hasDarkRP = DarkRP and type(ply.getDarkRPVar) == "function"
 	
 	local data = {
@@ -98,14 +89,12 @@ function DarkRPHUD.DHTML:UpdateData()
 		ammoReserve = 0
 	}
 	
-	-- Get weapon ammo
 	local weapon = ply:GetActiveWeapon()
 	if IsValid(weapon) then
 		data.ammo = weapon:Clip1() or 0
 		data.ammoReserve = ply:GetAmmoCount(weapon:GetPrimaryAmmoType()) or 0
 	end
 	
-	-- Send to HTML panel
 	local success, jsonData = pcall(util.TableToJSON, data)
 	if success then
 		self.Panel:Call("updateHUD(" .. jsonData .. ")")
@@ -146,7 +135,7 @@ function DarkRPHUD.DHTML:StopUpdateLoop()
 end
 
 --[[
-	Destroy panel safely
+	Destroy panel
 ]]--
 function DarkRPHUD.DHTML:Destroy()
 	self:StopUpdateLoop()

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkRP Modern HUD - Tailwind Edition</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            pointer-events: none !important;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: transparent;
+        }
+        
+        /* Custom animations */
+        @keyframes slideInLeft {
+            from { transform: translateX(-100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(90, 158, 229, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(90, 158, 229, 0.8); }
+        }
+        
+        .animate-slide-left { animation: slideInLeft 0.5s ease-out; }
+        .animate-slide-right { animation: slideInRight 0.5s ease-out; }
+        .low-health { animation: pulse-glow 1s infinite; }
+        
+        /* Smooth transitions */
+        .smooth-width { transition: width 0.3s ease-out; }
+        
+        /* Skew effect */
+        .skew-label {
+            transform: skewX(-15deg);
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="bg-transparent text-gray-100">
+    <div id="hud-container" class="fixed inset-0 select-none overflow-hidden">
+        
+        <!-- HUD Frame Border -->
+        <div class="absolute inset-0 border border-white/5 m-4 pointer-events-none"></div>
+
+        <!-- LEFT BOTTOM: Unit Info -->
+        <div class="absolute bottom-10 left-10 flex flex-col gap-4 scale-90 origin-bottom-left max-w-[400px] animate-slide-left">
+            
+            <!-- Job & Identity Section -->
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2">
+                    <div class="bg-[#5A9EE5] text-black px-3 py-0.5 text-[10px] font-black italic skew-label">
+                        ID_PROFILE
+                    </div>
+                    <div class="h-[1px] flex-grow bg-white/10"></div>
+                </div>
+                <div class="flex justify-between items-end bg-[#1A1A1A]/80 backdrop-blur-xl p-3 border border-white/5">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-[#9A9A9A] font-bold uppercase tracking-tighter">Current_Role</span>
+                        <span class="text-lg font-black italic text-[#5A9EE5] tracking-tight" id="job-name">ГРАЖДАНИН</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[9px] text-[#9A9A9A] font-bold uppercase">Paycheck</span>
+                        <span class="text-sm font-bold text-[#ECECEC] tracking-widest" id="salary-value">$50</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Module -->
+            <div class="bg-[#1A1A1A]/90 backdrop-blur-2xl p-4 border-l-[6px] border-[#5A9EE5] flex flex-col gap-1 shadow-[20px_0_50px_rgba(0,0,0,0.5)]">
+                <div class="flex justify-between items-center opacity-40 mb-1">
+                    <span class="text-[9px] font-black tracking-[0.4em]">CASH_ASSETS</span>
+                    <div class="w-12 h-[1px] bg-white"></div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-black text-[#5A9EE5]">$</span>
+                    <span class="text-4xl font-black italic tracking-tighter" id="money-amount">5000</span>
+                </div>
+            </div>
+
+            <!-- Vital Signs Module -->
+            <div class="bg-[#1A1A1A]/95 backdrop-blur-3xl p-5 border border-white/5 relative overflow-hidden flex flex-col gap-4" id="vitals-container">
+                <div class="flex justify-between items-center gap-8">
+                    <!-- Health -->
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="text-[10px] font-black tracking-[0.5em] text-[#9A9A9A]" id="health-label">HEALTH_CORE</span>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-5xl font-black italic tracking-tighter leading-none text-[#ECECEC]" id="health-value">100</span>
+                                <span class="text-xs font-bold opacity-30">%</span>
+                            </div>
+                        </div>
+                        <div class="w-full h-1.5 bg-black/40">
+                            <div class="h-full bg-[#ECECEC] smooth-width" id="health-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Armor -->
+                    <div class="w-32">
+                        <div class="flex justify-between items-end mb-1">
+                            <span class="text-[10px] font-black tracking-[0.5em] text-[#5A9EE5]">SHIELD</span>
+                            <span class="text-2xl font-black italic tracking-tighter leading-none text-[#5A9EE5]" id="armor-value">100</span>
+                        </div>
+                        <div class="w-full h-1 bg-black/40">
+                            <div class="h-full bg-[#5A9EE5] smooth-width" id="armor-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT BOTTOM: Arsenal -->
+        <div class="absolute bottom-10 right-10 flex flex-col items-end gap-2 scale-90 origin-bottom-right animate-slide-right">
+            <div class="bg-[#1A1A1A]/90 p-5 border-r-[6px] border-[#ECECEC] flex flex-col items-end min-w-[180px]">
+                <span class="text-[9px] font-black tracking-[0.4em] text-[#9A9A9A] mb-2 uppercase">Ammo_Inventory</span>
+                <div class="flex items-baseline gap-4">
+                    <span class="text-6xl font-black italic tracking-tighter leading-none" id="ammo-current">30</span>
+                    <div class="h-10 w-[1px] bg-white/10"></div>
+                    <div class="flex flex-col items-end opacity-50">
+                        <span class="text-[8px] font-bold">RESERVE</span>
+                        <span class="text-xl font-black" id="ammo-reserve">120</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT TOP: Killfeed -->
+        <div class="absolute top-10 right-10 flex flex-col gap-2 items-end w-[350px] scale-90 origin-top-right">
+            <div class="text-[9px] font-black text-[#5A9EE5] tracking-[0.8em] mb-2 opacity-50">KINETIC_FEED</div>
+            <div id="killfeed" class="flex flex-col gap-2 w-full"></div>
+        </div>
+
+    </div>
+
+    <script>
+        console.log('[DarkRP HUD Modern] Loaded successfully!');
+        
+        // Animation helper
+        function animateNumber(elementId, targetValue, duration = 300) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const startValue = parseFloat(element.textContent) || 0;
+            const diff = targetValue - startValue;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                const currentValue = startValue + (diff * progress);
+                element.textContent = Math.round(currentValue);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+        
+        // Update HUD function
+        window.updateHUD = function(data) {
+            console.log('[DarkRP HUD Modern] Received data:', data);
+            
+            if (!data) return;
+            
+            try {
+                // Update health
+                if (data.health !== undefined) {
+                    animateNumber('health-value', Math.floor(data.health));
+                    const healthPercent = (data.health / data.maxHealth * 100);
+                    document.getElementById('health-fill').style.width = healthPercent + '%';
+                    
+                    // Low health warning
+                    const vitalsContainer = document.getElementById('vitals-container');
+                    const healthLabel = document.getElementById('health-label');
+                    const healthValue = document.getElementById('health-value');
+                    const healthFill = document.getElementById('health-fill');
+                    
+                    if (data.health < 25) {
+                        vitalsContainer.classList.add('low-health');
+                        healthLabel.classList.remove('text-[#9A9A9A]');
+                        healthLabel.classList.add('text-[#E55A5A]');
+                        healthValue.classList.remove('text-[#ECECEC]');
+                        healthValue.classList.add('text-[#E55A5A]');
+                        healthFill.classList.remove('bg-[#ECECEC]');
+                        healthFill.classList.add('bg-[#E55A5A]');
+                    } else {
+                        vitalsContainer.classList.remove('low-health');
+                        healthLabel.classList.add('text-[#9A9A9A]');
+                        healthLabel.classList.remove('text-[#E55A5A]');
+                        healthValue.classList.add('text-[#ECECEC]');
+                        healthValue.classList.remove('text-[#E55A5A]');
+                        healthFill.classList.add('bg-[#ECECEC]');
+                        healthFill.classList.remove('bg-[#E55A5A]');
+                    }
+                }
+                
+                // Update armor
+                if (data.armor !== undefined) {
+                    animateNumber('armor-value', Math.floor(data.armor));
+                    const armorPercent = (data.armor / 100 * 100);
+                    document.getElementById('armor-fill').style.width = armorPercent + '%';
+                }
+                
+                // Update money
+                if (data.money !== undefined) {
+                    animateNumber('money-amount', data.money);
+                }
+                
+                // Update job
+                if (data.job) {
+                    document.getElementById('job-name').textContent = data.job.toUpperCase();
+                }
+                
+                // Update salary
+                if (data.salary !== undefined) {
+                    document.getElementById('salary-value').textContent = '$' + data.salary;
+                }
+                
+                // Update ammo
+                if (data.ammo !== undefined) {
+                    animateNumber('ammo-current', data.ammo);
+                }
+                
+                if (data.ammoReserve !== undefined) {
+                    animateNumber('ammo-reserve', data.ammoReserve);
+                }
+            } catch(e) {
+                console.error('[DarkRP HUD Modern] Update error:', e);
+            }
+        };
+        
+        // Killfeed function
+        window.addKill = function(data) {
+            console.log('[DarkRP HUD Modern] Kill event:', data);
+            
+            if (!data || !data.killer || !data.victim) return;
+            
+            const killfeed = document.getElementById('killfeed');
+            const killId = 'kill-' + Date.now();
+            
+            // Create kill element
+            const killElement = document.createElement('div');
+            killElement.id = killId;
+            killElement.className = 'flex items-center bg-[#1A1A1A]/70 backdrop-blur-2xl border-r-4 border-[#5A9EE5] overflow-hidden w-full';
+            killElement.style.animation = 'slideInRight 0.3s ease-out';
+            killElement.innerHTML = `
+                <div class="bg-[#5A9EE5] text-[#1A1A1A] px-3 py-1.5 text-[11px] font-black italic min-w-[100px] text-center">
+                    ${data.killer.toUpperCase()}
+                </div>
+                <div class="px-4 py-1.5 flex justify-between items-center flex-grow gap-4">
+                    <span class="text-[#9A9A9A] text-[9px] italic font-bold">ELIMINATED</span>
+                    <span class="font-black text-sm tracking-tight">${data.victim.toUpperCase()}</span>
+                </div>
+            `;
+            
+            // Add to killfeed
+            killfeed.insertBefore(killElement, killfeed.firstChild);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                killElement.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => {
+                    const el = document.getElementById(killId);
+                    if (el) el.remove();
+                }, 300);
+            }, 5000);
+            
+            // Keep only last 5 kills
+            const kills = killfeed.children;
+            if (kills.length > 5) {
+                kills[kills.length - 1].remove();
+            }
+        };
+        
+        // Test data on load
+        setTimeout(() => {
+            console.log('[DarkRP HUD Modern] Ready for data');
+        }, 500);
+    </script>
+</body>
+</html>
