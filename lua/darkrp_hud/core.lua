@@ -4,10 +4,11 @@
 ]]--
 
 DarkRPHUD = DarkRPHUD or {}
-DarkRPHUD.Version = "1.1.0"
+DarkRPHUD.Version = "1.2.0"
 DarkRPHUD.Panel = nil
 DarkRPHUD.Material = nil
 DarkRPHUD.Initialized = false
+DarkRPHUD.TestMode = false
 
 -- Load configuration
 if not DarkRPHUD.Config then
@@ -36,6 +37,7 @@ function DarkRPHUD:Initialize()
 	self.Initialized = true
 	
 	print("[DarkRP HUD] Initialization complete")
+	print("[DarkRP HUD] If you see this but no HUD, type: darkrp_hud_testmode")
 end
 
 --[[
@@ -153,10 +155,56 @@ function DarkRPHUD:HideDefaultHUD()
 end
 
 --[[
-	Render hook - Draw the HUD using material
+	Draw simple test HUD (without HTML)
+]]--
+local function DrawTestHUD()
+	local ply = LocalPlayer()
+	if not IsValid(ply) then return end
+	
+	local scrW, scrH = ScrW(), ScrH()
+	
+	-- Draw background
+	draw.RoundedBox(8, 20, scrH - 200, 300, 180, Color(26, 26, 26, 240))
+	
+	-- Title
+	draw.SimpleText("DarkRP HUD - TEST MODE", "DermaLarge", 30, scrH - 190, Color(90, 158, 229), TEXT_ALIGN_LEFT)
+	
+	-- Health
+	draw.SimpleText("Здоровье: " .. ply:Health(), "DermaDefault", 30, scrH - 160, Color(236, 236, 236), TEXT_ALIGN_LEFT)
+	
+	-- Armor
+	draw.SimpleText("Броня: " .. ply:Armor(), "DermaDefault", 30, scrH - 140, Color(90, 158, 229), TEXT_ALIGN_LEFT)
+	
+	-- Weapon
+	local weapon = ply:GetActiveWeapon()
+	if IsValid(weapon) then
+		local ammo = weapon:Clip1() or 0
+		local reserve = ply:GetAmmoCount(weapon:GetPrimaryAmmoType()) or 0
+		draw.SimpleText("Патроны: " .. ammo .. " / " .. reserve, "DermaDefault", 30, scrH - 120, Color(236, 236, 236), TEXT_ALIGN_LEFT)
+	end
+	
+	-- DarkRP info
+	if DarkRP and type(ply.getDarkRPVar) == "function" then
+		local job = ply:getDarkRPVar("job") or "Гражданин"
+		local money = ply:getDarkRPVar("money") or 0
+		draw.SimpleText("Работа: " .. job, "DermaDefault", 30, scrH - 100, Color(236, 236, 236), TEXT_ALIGN_LEFT)
+		draw.SimpleText("Деньги: $" .. money, "DermaDefault", 30, scrH - 80, Color(90, 158, 229), TEXT_ALIGN_LEFT)
+	end
+	
+	draw.SimpleText("Введите 'darkrp_hud_testmode' чтобы выключить", "DermaDefault", 30, scrH - 50, Color(150, 150, 150), TEXT_ALIGN_LEFT)
+end
+
+--[[
+	Render hook - Draw the HUD
 ]]--
 hook.Add("HUDPaint", "DarkRPHUD_Paint", function()
 	if not DarkRPHUD.Config.Enabled then return end
+	
+	-- Test mode - draw simple HUD
+	if DarkRPHUD.TestMode then
+		DrawTestHUD()
+		return
+	end
 	
 	-- Create material if it doesn't exist
 	if not IsValid(DarkRPHUD.Panel) then
@@ -171,6 +219,9 @@ hook.Add("HUDPaint", "DarkRPHUD_Paint", function()
 		surface.SetDrawColor(255, 255, 255, 255)
 		surface.SetMaterial(DarkRPHUD.Material)
 		surface.DrawTexturedRect(0, 0, scrW, scrH)
+	else
+		-- Fallback: show error message
+		draw.SimpleText("[DarkRP HUD] Material not loaded. Type 'darkrp_hud_reload'", "DermaLarge", ScrW() / 2, 100, Color(255, 100, 100), TEXT_ALIGN_CENTER)
 	end
 end)
 
@@ -222,6 +273,11 @@ concommand.Add("darkrp_hud_toggle", function()
 	print("[DarkRP HUD] " .. (DarkRPHUD.Config.Enabled and "Enabled" or "Disabled"))
 end)
 
+concommand.Add("darkrp_hud_testmode", function()
+	DarkRPHUD.TestMode = not DarkRPHUD.TestMode
+	print("[DarkRP HUD] Test Mode: " .. (DarkRPHUD.TestMode and "ON (simple HUD)" or "OFF (HTML HUD)"))
+end)
+
 concommand.Add("darkrp_hud_debug", function()
 	print("[DarkRP HUD] Debug Info:")
 	print("  - Version: " .. DarkRPHUD.Version)
@@ -229,6 +285,7 @@ concommand.Add("darkrp_hud_debug", function()
 	print("  - Panel Valid: " .. tostring(IsValid(DarkRPHUD.Panel)))
 	print("  - Material Valid: " .. tostring(DarkRPHUD.Material ~= nil))
 	print("  - Config Enabled: " .. tostring(DarkRPHUD.Config.Enabled))
+	print("  - Test Mode: " .. tostring(DarkRPHUD.TestMode))
 	print("  - Screen Size: " .. ScrW() .. "x" .. ScrH())
 	
 	if IsValid(DarkRPHUD.Panel) then
@@ -239,6 +296,10 @@ concommand.Add("darkrp_hud_debug", function()
 		DarkRPHUD:UpdateData()
 		print("  - Test data sent")
 	end
+	
+	print("\nКоманды:")
+	print("  - darkrp_hud_testmode - переключить простой HUD")
+	print("  - darkrp_hud_reload - перезагрузить HTML HUD")
 end)
 
 concommand.Add("darkrp_hud_test_kill", function()
